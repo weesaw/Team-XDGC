@@ -13,6 +13,7 @@ MPU9250 IMU2(NOT_SPI, 2);
 float time_now, delt_t;
 int16_t Mag1_temp[3], Mag2_temp[3];
 float transmit_data[19];
+float measure_start;
 
 void setup() {
   
@@ -220,7 +221,7 @@ void setup() {
       Serial.println(IMU2.factoryMagCalibration[2], 2);
     }
 
-  } // if (c == 0x71)
+  } // if (both c == 0x71)
   else if(c2 == 0x71)
   {
     Serial.print("Could not connect to MPU1: 0x");
@@ -253,6 +254,7 @@ void setup() {
     abort();
   }
 
+  measure_start = millis();
 }
 
 void loop() {
@@ -490,7 +492,7 @@ void loop() {
 
     if(Transmit)
     {
-        transmit_data[0] = millis();
+        transmit_data[0] = (millis() - measure_start)/1000.0;
         transmit_data[1] = IMU1.ax; transmit_data[2] = IMU1.ay;transmit_data[3] = IMU1.az;
         transmit_data[4] = IMU1.gx; transmit_data[5] = IMU1.gy;transmit_data[6] = IMU1.gz;
         transmit_data[7] = IMU1.roll; transmit_data[8] = IMU1.pitch;transmit_data[9] = IMU1.yaw;
