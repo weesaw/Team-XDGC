@@ -44,5 +44,7 @@ double *stride_segmentation(double *arr, int n);
 double *stride_segmentation_3(double *arr, int n);
 double *stride_segmentation_1(double *arr, int n);
 
+double *extract_features(double *t, double *y2_gyro, double *x2_accel, double *y_gyro, double *x_accel, double *z_gyro, int N_SAMPLES);
+
 #endif
 

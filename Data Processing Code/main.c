@@ -68,9 +68,10 @@ int main(int argc, const char * argv[]) {
     
 
     ifile_name = "/Users/gaozhanxi/Desktop/EE 249A Project/Lifting1.csv";
+    //ifile_name = "/Users/gaozhanxi/Desktop/EE 249A Project/ctest/ctest/Punching1.csv";
     ofile_pt_name = "/Users/gaozhanxi/Desktop/pd.csv";
     ofile_st_name = "/Users/gaozhanxi/Desktop/sd.csv";
-    train_file_name = "/Users/gaozhanxi/Desktop/trd.txt";
+    train_file_name = "/Users/gaozhanxi/Desktop/trd_bar.txt";
     fpi = fopen(ifile_name, "r");
     
     /* count the number of lines in the file */
@@ -80,7 +81,7 @@ int main(int argc, const char * argv[]) {
         N_SAMPLES++;
     }
     fprintf(stderr,
-            "red \'%d\'.\n",
+            "read \'%d\'.\n",
             N_SAMPLES);
 
     
@@ -106,13 +107,13 @@ int main(int argc, const char * argv[]) {
     y2_gyro = (double *) malloc(sizeof(double) * N_SAMPLES);
     z2_gyro = (double *) malloc(sizeof(double) * N_SAMPLES);
     
-    r1 = (double *) malloc(sizeof(double) * N_SAMPLES);
-    p1 = (double *) malloc(sizeof(double) * N_SAMPLES);
-    y1 = (double *) malloc(sizeof(double) * N_SAMPLES);
+    r1 = (double *) malloc(sizeof(double) * 1);
+    p1 = (double *) malloc(sizeof(double) * 1);
+    y1 = (double *) malloc(sizeof(double) * 1);
     
-    r2 = (double *) malloc(sizeof(double) * N_SAMPLES);
-    p2 = (double *) malloc(sizeof(double) * N_SAMPLES);
-    y2 = (double *) malloc(sizeof(double) * N_SAMPLES);
+    r2 = (double *) malloc(sizeof(double) * 1);
+    p2 = (double *) malloc(sizeof(double) * 1);
+    y2 = (double *) malloc(sizeof(double) * 1);
     
     t = (double *) malloc(sizeof(double) * N_SAMPLES);
     x = (double *) malloc(sizeof(double) * N_SAMPLES);
@@ -121,7 +122,7 @@ int main(int argc, const char * argv[]) {
         /* parse the data */
         //rv = sscanf(line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n", &t_accel[i], &t_gyro[i], &x_accel[i], &y_accel[i], &z_accel[i], &x_gyro[i], &y_gyro[i], &z_gyro[i]);
         
-        rv = sscanf(line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n", &t_accel[i], &x_accel[i], &y_accel[i], &z_accel[i], &x_gyro[i], &y_gyro[i], &z_gyro[i], &r1[i], &p1[i], &y1[i], &x2_accel[i], &y2_accel[i], &z2_accel[i], &x2_gyro[i], &y2_gyro[i], &z2_gyro[i],&r2[i], &p2[i], &y2[i]);
+        rv = sscanf(line, "%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf,%lf\n", &t_accel[i], &x_accel[i], &y_accel[i], &z_accel[i], &x_gyro[i], &y_gyro[i], &z_gyro[i], &r1[0], &p1[0], &y1[0], &x2_accel[i], &y2_accel[i], &z2_accel[i], &x2_gyro[i], &y2_gyro[i], &z2_gyro[i],&r2[0], &p2[0], &y2[0]);
         
         if (rv != 19) {
             fprintf(stderr,
@@ -138,31 +139,14 @@ int main(int argc, const char * argv[]) {
     
     
     fclose(fpi);
+
+    // test func
+    double *bar;
+    bar = extract_features(t_accel, y2_gyro, x2_accel, y_gyro, x_accel, z_gyro, N_SAMPLES);
+    for(int s=0; s<23;s++) printf(" %10.8lf", bar[s]);
     
-    /*
-    int ii;
-    for (ii=0; ii<N_SAMPLES; ii++)
-    {
-        double temp = 0;
-        temp = x_accel[ii]/8;
-        x_accel[ii] = temp;
-        
-        temp = y_accel[ii]/8;
-        y_accel[ii] = temp;
-        
-        temp = z_accel[ii]/8;
-        z_accel[ii] = temp;
-        
-        temp = x_gyro[ii]/500;
-        x_gyro[ii] = temp;
-        
-        temp = y_gyro[ii]/500;
-        y_gyro[ii] = temp;
-        
-        temp = z_gyro[ii]/500;
-        z_gyro[ii]= temp;
-    }
-     */
+    
+    
     
     //input file closed
     /*
@@ -315,7 +299,8 @@ int main(int argc, const char * argv[]) {
         int n_T_new = n_T;
         
         // Process Peaks
-        for (i = 0; i < n_P_new-1; i++)
+        
+        for (i = 0; i < n_P_new; i++)
         {
             idx = (int) P_i[i];
             idx_next = (int) P_i[i+1];
@@ -364,6 +349,7 @@ int main(int argc, const char * argv[]) {
                 
             }
         }
+        
         
         // add one more condition
         // delete peaks or troughs that are too close to offset value
@@ -457,12 +443,12 @@ int main(int argc, const char * argv[]) {
 
         
         /* Write the stride features to the training file */
-        int num_samples = n_P-1;
-        int num_features = 34;
+        int num_samples = n_P;
+        int num_features = 23;
         int num_speeds = 7;
         double scale_slope = 1.00; // change from 0.25 to 1 because it's already normalized
         double scale_offset = 0.00;
-        double period_slope = 0.40; // nomalize the period
+        double period_slope = 1; // nomalize the period
         double period_offset = 0.00; // change from -1.30 to 0
         
         int peak_idx1 = 0, peak_idx2 = 0;
@@ -556,32 +542,8 @@ int main(int argc, const char * argv[]) {
         //fclose(fps);
         
         
-        /*
-        if (j == 0) // For gyro Y2
-        {
-            n_samples_ay = n_P-1;
-            // Write the minima, maxima, and period of the stride to the training file in this order
-            k = 0;
-            
-            for (i = 0; (i < n_P-1) && (k < n_S-1); i++)
-            {
-                //stride_idx1 = (int) S_i[k];
-                //stride_idx2 = (int) S_i[k+1];
-                peak_idx1 = (int) P_i[i];
-                peak_idx2 = (int) P_i[i+1];
-                trough_idx = (int) T_i[i];
-                
-                minima_ay[i] = scale_slope * x[trough_idx] + scale_offset;                            // minima is the trough
-                maxima_ay[i] = scale_slope * x[peak_idx1] + scale_offset;                             // maxima is the peak
-                period_ay[i] = period_slope * (t[peak_idx2] - t[peak_idx1]) + period_offset;          // period is the time from peak to peak
-                //if (period_ay[i] > 1) period_ay[i] = 1;  // in case period value exceeds 1
-                
-                k = k + 1;
-            }
-        }
-         */
         
-        if (j == 0) // map gyro2 Z to accel x
+        if (j == 0) // map gyro2 y to accel x
         {
             
             // Write the minima, maxima, and period of the stride to the training file in this order
@@ -611,12 +573,15 @@ int main(int argc, const char * argv[]) {
                 //if (minima_ay[i] == 0 && maxima_ay[i]==0 && period_ay[i] == 0) continue;
                 
                 // stride segmentation
-                double *segment_start = z2_gyro, *segment_map = x2_accel;
+                double *segment_start = y2_gyro, *segment_map = x2_accel, *segment_map2 = y_gyro, *segment_map3 = x_accel, *segment_map4 = z_gyro;
                 int m;
                 for (m = 0; m <= trough_idx1; m++)
                 {
                     segment_start++;
                     segment_map++;
+                    segment_map2++;
+                    segment_map3++;
+                    segment_map4++;
                 }
                 
                 int segment_length = 0;
@@ -629,17 +594,25 @@ int main(int argc, const char * argv[]) {
                 
                 // map gyro_z to y_accel
                 // y_accel[trough_idx1] to y_accel[trough_idx2]
-                double *segmentation_map_result;
+                double *segmentation_map_result, *segmentation_map_result2, *segmentation_map_result3, *segmentation_map_result4;
                 segmentation_map_result = stride_segmentation_1(segment_map, segment_length);
+                segmentation_map_result2 = stride_segmentation_1(segment_map2, segment_length);
+                segmentation_map_result3 = stride_segmentation_1(segment_map3, segment_length);
+                segmentation_map_result4 = stride_segmentation_1(segment_map4, segment_length);
                 
                 
                 fprintf(fpt, "\n%10.8lf %10.8lf %10.8lf", minima_gz[i], maxima_gz[i], period_gz[i]);
                 int k=0;
                 for(k=0; k<4;k++) fprintf(fpt, " %10.8lf", segmentation_result[k]);
                 for(k=0; k<4;k++) fprintf(fpt, " %10.8lf", segmentation_map_result[k]);
-                fprintf(fpt, "\n");
+                for(k=0; k<4;k++) fprintf(fpt, " %10.8lf", segmentation_map_result2[k]);
+                for(k=0; k<4;k++) fprintf(fpt, " %10.8lf", segmentation_map_result3[k]);
+                for(k=0; k<4;k++) fprintf(fpt, " %10.8lf", segmentation_map_result4[k]);
                 
+                // gyro_y2_trough, peak, period, gy2min, max, mean, std, ax2min, max, mean, std, gy1min, max, mean, std, ax1min, max, mean, std;
+                //fprintf(fpt, "\n");
                 
+                /*
                 if (mode == 1) // walking speed 1
                 {
                     fprintf(fpt, "%d %d %d %d %d %d %d", 1, -1, -1, -1, -1, -1, -1);
@@ -678,6 +651,7 @@ int main(int argc, const char * argv[]) {
                 {
                     fprintf(fpt, "%d %d %d %d %d %d %d", 0, 0, 0, 0, 0, 0, 0);
                 }
+                 */
                 k = k + 1;
             }
         }
@@ -693,6 +667,7 @@ int main(int argc, const char * argv[]) {
     //remove("data.csv");
     //neural_network_result("trd.txt");
     
+    /*
     free(t_accel);
     free(x_accel);
     free(y_accel);
@@ -719,7 +694,7 @@ int main(int argc, const char * argv[]) {
     free(S_i);
     free(maxima_gz);
     free(minima_gz);
-    free(period_gz);
+    free(period_gz); */
     
     return 0;
 }
